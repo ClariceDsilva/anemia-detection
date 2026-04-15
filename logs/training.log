@@ -1,0 +1,42 @@
+2026-04-14 18:09:40,357 [INFO] Loading dataset and extracting features...
+2026-04-14 18:09:40,371 [INFO]   anemic: 1200 images
+2026-04-14 18:10:14,860 [INFO]   normal: 1200 images
+2026-04-14 18:10:49,313 [INFO] Feature matrix: (2400, 223), Labels: (2400,)
+2026-04-14 18:10:49,314 [INFO] 
+============================================================
+2026-04-14 18:10:49,314 [INFO] TRAINING ANEMIA DETECTION MODEL
+2026-04-14 18:10:49,314 [INFO] ============================================================
+2026-04-14 18:10:49,321 [INFO] Train: 1680, Val: 240, Test: 480
+2026-04-14 18:10:49,321 [INFO] Training Gradient Boosting Classifier (n_estimators=200)...
+2026-04-14 18:10:56,564 [INFO] Training completed in 7.2s
+2026-04-14 18:10:56,573 [INFO] Train Accuracy: 1.0000 (100.00%)
+2026-04-14 18:10:56,574 [INFO] Val   Accuracy: 1.0000 (100.00%)
+2026-04-14 18:10:56,574 [INFO] Test  Accuracy: 0.9979 (99.79%)
+2026-04-14 18:10:56,577 [INFO] Test  AUC-ROC:  1.0000
+2026-04-14 18:10:56,584 [INFO] 
+Classification Report:
+              precision    recall  f1-score   support
+
+      Anemic       1.00      1.00      1.00       240
+      Normal       1.00      1.00      1.00       240
+
+    accuracy                           1.00       480
+   macro avg       1.00      1.00      1.00       480
+weighted avg       1.00      1.00      1.00       480
+
+2026-04-14 18:10:56,587 [INFO] Confusion Matrix:
+[[239   1]
+ [  0 240]]
+2026-04-14 18:10:57,171 [INFO] Training curves saved: static/training_curves.png
+2026-04-14 18:10:57,455 [INFO] Confusion matrix saved: static/confusion_matrix.png
+2026-04-14 18:10:57,461 [INFO] Model saved: model/best_model.pkl
+2026-04-14 18:10:57,462 [INFO] Metadata saved: model/model_metadata.json
+2026-04-14 18:10:57,462 [INFO] 
+============================================================
+2026-04-14 18:10:57,462 [INFO] TRAINING COMPLETE ✓
+2026-04-14 18:10:57,463 [INFO]   Test Accuracy: 99.79%
+2026-04-14 18:10:57,463 [INFO]   AUC-ROC:       1.0000
+2026-04-14 18:10:57,463 [INFO]   Model saved to: /home/claude/anemia_project/model/best_model.pkl
+2026-04-14 18:10:57,463 [INFO] ============================================================
+2026-04-14 18:10:57,464 [INFO] 
+Next step: python app.py

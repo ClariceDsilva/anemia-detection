@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AnemiaAI — Intelligent Anemia Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070b12;
+      --bg2:       #0d1420;
+      --bg3:       #111927;
+      --border:    #1e2d40;
+      --border2:   #253447;
+      --accent:    #00d4ff;
+      --accent2:   #0099cc;
+      --danger:    #ff4a4a;
+      --warn:      #ffaa00;
+      --ok:        #00e676;
+      --text:      #e2eaf5;
+      --muted:     #7a93b0;
+      --card:      #0f1c2e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 600px; height: 600px; background: rgba(0,212,255,0.06); top: -200px; left: -200px; }
+    .orb-2 { width: 500px; height: 500px; background: rgba(255,74,74,0.05); bottom: -150px; right: -100px; }
+
+    .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0 48px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 52px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), #0055aa);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(0,212,255,0.3);
+    }
+    .logo-text { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
+    .logo-text span { color: var(--accent); }
+    .badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.25);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.08em;
+    }
+
+    /* Hero */
+    .hero { text-align: center; margin-bottom: 52px; }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+    }
+
+    /* Model status */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 48px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 8px var(--ok);
+      animation: pulse 2s infinite;
+    }
+    .status-dot.offline { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Flash messages */
+    .flash { padding: 14px 20px; border-radius: 10px; margin-bottom: 24px; font-size: 0.9rem; border: 1px solid; }
+    .flash.error { background: rgba(255,74,74,0.1); border-color: rgba(255,74,74,0.3); color: #ff9a9a; }
+    .flash.info { background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.3); color: var(--accent); }
+
+    /* Upload card */
+    .upload-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border2);
+      border-radius: 16px;
+      padding: 52px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      background: var(--bg2);
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(0,212,255,0.04);
+    }
+    .drop-zone input[type=file] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.6; }
+    .drop-text { font-size: 1rem; color: var(--text); margin-bottom: 6px; }
+    .drop-sub { font-size: 0.82rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    /* Preview grid */
+    #preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .preview-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-remove {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(255,74,74,0.85);
+      border: none; border-radius: 50%;
+      width: 22px; height: 22px;
+      color: white; font-size: 12px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .preview-name {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.7);
+      font-size: 0.6rem; padding: 3px 5px;
+      color: #ccc;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Symptoms section */
+    .symptoms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .symptom-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .symptom-check:hover { border-color: var(--accent); }
+    .symptom-check input { display: none; }
+    .symptom-check input:checked + .check-box { background: var(--accent); border-color: var(--accent); }
+    .symptom-check input:checked ~ .symptom-label { color: var(--text); }
+    .check-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border2);
+      border-radius: 5px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .check-box::after { content: '✓'; font-size: 11px; color: #000; display: none; }
+    .symptom-check input:checked + .check-box::after { display: block; }
+    .symptom-label { font-size: 0.85rem; color: var(--muted); }
+    .symptom-icon { font-size: 1rem; }
+
+    /* Severity slider */
+    .slider-wrap { margin-bottom: 24px; }
+    .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .slider-label span { font-size: 0.85rem; color: var(--muted); }
+    .slider-val { font-family: 'DM Mono', monospace; font-size: 1rem; color: var(--accent); }
+    input[type=range] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border2);
+      border-radius: 99px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,212,255,0.5);
+    }
+
+    /* Submit button */
+    .btn-analyze {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.35); }
+    .btn-analyze:active { transform: translateY(0); }
+    .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* How it works */
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .how-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 20px;
+    }
+    .how-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+    .how-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+    .how-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+      line-height: 1.8;
+    }
+    .disclaimer {
+      background: rgba(255,170,0,0.07);
+      border: 1px solid rgba(255,170,0,0.2);
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: #ffcc66;
+      text-align: left;
+    }
+
+    /* Loading overlay */
+    #loading-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(7,11,18,0.92);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    #loading-overlay.active { display: flex; }
+    .spinner {
+      width: 56px; height: 56px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 1rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .loading-sub { font-size: 0.78rem; color: #3a5070; }
+  </style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Analyzing images...</div>
+  <div class="loading-sub">Extracting color and texture biomarkers</div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🩸</div>
+      <div class="logo-text">Anemia<span>AI</span></div>
+    </div>
+  </header>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <div class="hero">
+    <h1>AI-Powered<br><em>Anemia Detection</em></h1>
+    <p>Upload conjunctiva or nail bed images for instant anemia risk assessment using advanced machine learning biomarker analysis.</p>
+
+    <div class="status-bar">
+      <div class="status-dot {% if not model_loaded %}offline{% endif %}"></div>
+      {% if model_loaded %}
+        Model loaded &amp; ready
+        {% if metrics %}
+          · Accuracy: {{ (metrics.test_accuracy * 100)|round(1) }}%
+          · AUC: {{ metrics.auc_roc }}
+        {% endif %}
+      {% else %}
+        Model offline — run <code>python train.py</code>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if metrics %}
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ (metrics.train_accuracy * 100)|round(1) }}%</div>
+      <div class="stat-label">Train Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ (metrics.val_accuracy * 100)|round(1) }}%</div>
+      <div class="stat-label">Val Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ (metrics.test_accuracy * 100)|round(1) }}%</div>
+      <div class="stat-label">Test Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ metrics.auc_roc }}</div>
+      <div class="stat-label">AUC-ROC</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <form action="/predict" method="POST" enctype="multipart/form-data" id="upload-form">
+
+    <!-- Image Upload -->
+    <div class="upload-card">
+      <div class="section-title">01 · Upload Images</div>
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" name="images" id="file-input" multiple
+               accept=".jpg,.jpeg,.png,.bmp,.webp" onchange="handleFiles(this.files)">
+        <div class="drop-icon">📷</div>
+        <div class="drop-text">Drop conjunctiva or nail bed images here</div>
+        <div class="drop-sub">PNG · JPG · JPEG · BMP · WEBP · max 10 MB each · up to 10 images</div>
+      </div>
+      <div id="preview-grid"></div>
+    </div>
+
+    <!-- Symptoms -->
+    <div class="upload-card">
+      <div class="section-title">02 · Symptom Assessment (Optional)</div>
+
+      <div class="symptoms-grid">
+        {% set symptoms = [
+          ('fatigue', '😴', 'Unusual fatigue / weakness'),
+          ('pale', '👋', 'Pale or yellowish skin'),
+          ('breath', '💨', 'Shortness of breath'),
+          ('dizzy', '😵', 'Dizziness or headache'),
+          ('palpitations', '💓', 'Heart palpitations'),
+          ('brittle_nails', '💅', 'Brittle or spoon-shaped nails'),
+          ('cold_hands', '🥶', 'Cold hands and feet'),
+          ('craving', '🧊', 'Craving ice or dirt (pica)'),
+        ] %}
+        {% for val, icon, label in symptoms %}
+        <label class="symptom-check">
+          <input type="checkbox" name="symptoms" value="{{ val }}">
+          <div class="check-box"></div>
+          <span class="symptom-icon">{{ icon }}</span>
+          <span class="symptom-label">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="slider-wrap">
+        <div class="slider-label">
+          <span>Overall symptom severity</span>
+          <span class="slider-val" id="slider-display">0 / 10</span>
+        </div>
+        <input type="range" name="symptom_score" id="severity-slider"
+               min="0" max="10" value="0" step="1"
+               oninput="document.getElementById('slider-display').textContent = this.value + ' / 10'">
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn-analyze" id="analyze-btn"
+            {% if not model_loaded %}disabled{% endif %}>
+      {% if model_loaded %}🔬 Analyze for Anemia Risk{% else %}⚠️ Model Not Loaded{% endif %}
+    </button>
+
+  </form>
+
+  <!-- How it works -->
+  <div style="margin-top: 52px;">
+    <div class="section-title">How it works</div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-title">📤 Upload</div>
+        <div class="how-desc">Upload clear photos of conjunctiva (inner eyelid) or nail beds — the key sites for pallor detection.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-title">🔬 Analyze</div>
+        <div class="how-desc">ML model extracts color histograms, pallor index, saturation, and texture biomarkers from each image.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-title">📊 Score</div>
+        <div class="how-desc">Probabilities across all images are averaged into a final anemia risk score with confidence percentage.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04</div>
+        <div class="how-title">🚦 Result</div>
+        <div class="how-desc">Risk is mapped to Low / Medium / High with a recommendation to consult a physician if elevated.</div>
+      </div>
+    </div>
+  </div>
+
+  {% if model_loaded %}
+  <div style="margin-top: 40px; text-align:center;">
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:12px;">Training visualizations</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="/static/training_curves.png" target="_blank"
+         style="color:var(--accent);font-size:0.82rem;text-decoration:none;border:1px solid var(--border);padding:8px 16px;border-radius:8px;">
+        📈 Training Curves
+      </a>
+      <a href="/static/confusion_matrix.png" target="_blank"
+         style="color:var(--accent);font-size:0.82rem;text-decoration:none;border:1px solid var(--border);padding:8px 16px;border-radius:8px;">
+        🗂️ Confusion Matrix
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="disclaimer">
+    ⚠️ <strong>Medical Disclaimer:</strong> This tool is for educational and research purposes only.
+    It does not constitute medical advice and should not replace professional diagnosis.
+    Always consult a qualified healthcare provider for medical concerns.
+  </div>
+
+  <footer>
+    AnemiaAI · Final Year Project · Machine Learning — Image Classification<br>
+    Built with Flask · OpenCV · Scikit-learn · Python 3
+  </footer>
+</div>
+
+<script>
+  // Drag and drop
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  let selectedFiles = [];
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  function handleFiles(fileList) {
+    for (const file of fileList) {
+      if (selectedFiles.length >= 10) break;
+      if (!file.type.startsWith('image/')) continue;
+      if (selectedFiles.find(f => f.name === file.name && f.size === file.size)) continue;
+      selectedFiles.push(file);
+    }
+    updatePreviews();
+    updateFileInput();
+  }
+
+  function updatePreviews() {
+    const grid = document.getElementById('preview-grid');
+    grid.innerHTML = '';
+    selectedFiles.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.innerHTML = `
+          <img src="${e.target.result}" alt="${file.name}">
+          <button class="preview-remove" type="button" onclick="removeFile(${idx})">✕</button>
+          <div class="preview-name">${file.name}</div>
+        `;
+        grid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function removeFile(idx) {
+    selectedFiles.splice(idx, 1);
+    updatePreviews();
+    updateFileInput();
+  }
+
+  function updateFileInput() {
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    fileInput.files = dt.files;
+  }
+
+  // Form submit
+  document.getElementById('upload-form').addEventListener('submit', function(e) {
+    if (selectedFiles.length === 0) {
+      e.preventDefault();
+      alert('Please upload at least one image.');
+      return;
+    }
+    document.getElementById('loading-overlay').classList.add('active');
+    document.getElementById('analyze-btn').disabled = true;
+  });
+</script>
+</body>
+</html>

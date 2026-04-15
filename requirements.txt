@@ -1,0 +1,14 @@
+Flask==3.0.0
+Werkzeug==3.0.1
+torch==2.2.0
+torchvision==0.17.0
+Pillow==10.2.0
+numpy==1.26.4
+scikit-learn==1.4.0
+matplotlib==3.8.2
+tqdm==4.66.1
+opencv-python-headless==4.9.0.80
+flask
+opencv-python
+numpy
+scikit-learn

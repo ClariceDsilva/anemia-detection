@@ -1,0 +1,13 @@
+{
+  "classes": [
+    "anemic",
+    "normal"
+  ],
+  "samples": {
+    "anemic": 1200,
+    "normal": 1200
+  },
+  "total": 2400,
+  "image_size": 224,
+  "description": "Synthetic anemia detection dataset based on conjunctiva/nail pallor"
+}
