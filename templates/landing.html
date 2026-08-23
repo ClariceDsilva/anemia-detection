@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnemiaAI — AI-Assisted Anemia Risk Screening</title>
+  <meta name="description" content="AnemiaAI is a research and educational prototype that estimates anemia risk from palm and nail-bed images using computer vision and machine learning." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-orb orb-cyan" aria-hidden="true"></div>
+  <div class="bg-orb orb-coral" aria-hidden="true"></div>
+
+  <!-- ================= NAV ================= -->
+  <nav class="nav" id="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top">
+        <div class="brand-icon">🩸</div>
+        <div class="brand-text">Anemia<span>AI</span></div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#top">Home</a></li>
+        <li><a href="#about-anemia">About Anemia</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#benefits">Benefits</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/signup">Sign Up</a></li>
+      </ul>
+
+      <div class="nav-auth">
+        <a href="/login" class="btn btn-ghost btn-sm">Login</a>
+        <a href="/signup" class="btn btn-primary btn-sm">Sign Up</a>
+      </div>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <header class="hero" id="top">
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Computer Vision · Machine Learning · Research Prototype</span>
+        <h1>AI-Assisted <em>Anemia Risk</em> Screening</h1>
+        <p>
+          AnemiaAI is a research and educational prototype that analyzes the color and
+          texture of palm and nail-bed images to produce an anemia-risk estimate —
+          the same visual cues clinicians look for during a physical exam, interpreted
+          through a computer-vision and machine-learning pipeline.
+        </p>
+        <div class="hero-actions">
+          <a href="{{ url_for('index') }}" class="btn btn-primary">Get Started</a>
+          <a href="#about-project" class="btn btn-ghost">Learn More</a>
+        </div>
+        <div class="hero-meta">
+          <span class="dot"></span>
+          <span>Educational prototype — not a diagnostic device</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal">
+        <div class="scan-panel">
+          <div class="scan-panel-head">
+            <span class="scan-panel-title"><span class="live-dot"></span> Color Scan</span>
+            <span class="scan-panel-title">Illustrative</span>
+          </div>
+          <div class="scan-stage">
+            <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scanTitle">
+              <title id="scanTitle">Illustrative color-scan graphic representing pallor-to-color analysis. Not an actual clinical image.</title>
+              <defs>
+                <linearGradient id="palGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f3e3d3"/>
+                  <stop offset="45%" stop-color="#e79a86"/>
+                  <stop offset="100%" stop-color="#ff5c72"/>
+                </linearGradient>
+                <filter id="scanGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <rect x="0" y="0" width="240" height="240" fill="#0d1420"/>
+
+              <g stroke="#1e2d40" stroke-width="1" opacity="0.6">
+                <line x1="0" y1="60" x2="240" y2="60"/>
+                <line x1="0" y1="120" x2="240" y2="120"/>
+                <line x1="0" y1="180" x2="240" y2="180"/>
+              </g>
+
+              <rect x="48" y="16" width="104" height="208" rx="52" fill="url(#palGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+              <g class="scan-readout r1" font-family="'DM Mono', monospace" font-size="9" fill="#7a93b0">
+                <line x1="152" y1="70" x2="170" y2="70" stroke="#253447" stroke-width="1"/>
+                <text x="174" y="73">HUE</text>
+              </g>
+              <g class="scan-readout r2" font-family="'DM Mono', monospace" font-size="9" fill="#7a93b0">
+                <line x1="152" y1="120" x2="170" y2="120" stroke="#253447" stroke-width="1"/>
+                <text x="174" y="123">SAT</text>
+              </g>
+              <g class="scan-readout r3" font-family="'DM Mono', monospace" font-size="9" fill="#7a93b0">
+                <line x1="152" y1="170" x2="170" y2="170" stroke="#253447" stroke-width="1"/>
+                <text x="174" y="173">PALLOR</text>
+              </g>
+
+              <g class="scan-line">
+                <rect x="40" y="118" width="120" height="10" fill="#00d4ff" opacity="0.2" filter="url(#scanGlow)"/>
+                <rect x="48" y="122" width="104" height="2" fill="#00d4ff"/>
+              </g>
+            </svg>
+          </div>
+          <div class="scan-panel-foot">
+            <span>PALLOR ↔ NORMAL SPECTRUM</span>
+            <span>UI ILLUSTRATION</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= ABOUT ANEMIA ================= -->
+  <section id="about-anemia">
+    <div class="shell">
+      <div class="section-head reveal">
+        <span class="eyebrow">Understanding Anemia</span>
+        <h2>What is anemia, and why does it matter?</h2>
+        <p>
+          Anemia occurs when the blood doesn't have enough healthy red blood cells,
+          or enough <strong style="color: var(--text);">hemoglobin</strong>, to carry
+          adequate oxygen to the body's tissues. Hemoglobin is the protein inside red
+          blood cells that binds oxygen in the lungs and delivers it throughout the
+          body — when levels drop, tissues and organs receive less oxygen than they need.
+        </p>
+      </div>
+
+      <div class="info-grid reveal">
+        <div class="info-card">
+          <div class="glyph">😴</div>
+          <h3>Fatigue &amp; Weakness</h3>
+          <p>Persistent tiredness, even after rest, is one of the earliest and most common signs.</p>
+        </div>
+        <div class="info-card">
+          <div class="glyph">🎨</div>
+          <h3>Pale Skin, Nails &amp; Gums</h3>
+          <p>Reduced hemoglobin can visibly change the color of skin, nail beds, and inner eyelids.</p>
+        </div>
+        <div class="info-card">
+          <div class="glyph">💨</div>
+          <h3>Shortness of Breath</h3>
+          <p>Lower oxygen delivery can make everyday activity feel more strenuous than usual.</p>
+        </div>
+        <div class="info-card">
+          <div class="glyph">💫</div>
+          <h3>Dizziness</h3>
+          <p>Lightheadedness or trouble concentrating can occur when the brain receives less oxygen.</p>
+        </div>
+        <div class="info-card">
+          <div class="glyph">🧊</div>
+          <h3>Cold Hands &amp; Feet</h3>
+          <p>Poor circulation of oxygen-rich blood can leave extremities feeling cold.</p>
+        </div>
+        <div class="info-card">
+          <div class="glyph">❤️</div>
+          <h3>Irregular Heartbeat</h3>
+          <p>In more pronounced cases, the heart may work harder to compensate, affecting rhythm.</p>
+        </div>
+      </div>
+
+      <p class="about-copy reveal" style="margin-top: 40px;">
+        Anemia is common worldwide and often goes unnoticed because early symptoms can
+        be subtle or mistaken for everyday tiredness. A simple visual screening step —
+        like checking the color of the palms or nail beds — can help someone decide
+        whether it's worth pursuing a proper blood test, without replacing one.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT THIS PROJECT ================= -->
+  <section id="about-project" class="tight">
+    <div class="shell">
+      <div class="section-head reveal">
+        <span class="eyebrow coral">About This Project</span>
+        <h2>A student-built research prototype</h2>
+        <p>
+          AnemiaAI is a computer vision and machine learning project exploring whether
+          image-based color and texture analysis can offer a useful, low-cost signal
+          for anemia risk. It is a proof of concept, not a finished medical product.
+        </p>
+      </div>
+
+      <div class="project-layout">
+        <div class="fact-list reveal">
+          <div class="fact-item">
+            <span class="mark">✓</span>
+            <p>A student / research project built to explore computer vision in a healthcare context.</p>
+          </div>
+          <div class="fact-item">
+            <span class="mark">✓</span>
+            <p>An AI-assisted <strong>screening</strong> prototype — not a diagnostic tool.</p>
+          </div>
+          <div class="fact-item">
+            <span class="mark">✓</span>
+            <p>Built on a computer vision / machine learning pipeline that extracts color and texture features from images.</p>
+          </div>
+          <div class="fact-item">
+            <span class="mark">✗</span>
+            <p>Not clinically validated, and not evaluated for real-world diagnostic accuracy.</p>
+          </div>
+        </div>
+
+        <div class="callout reveal">
+          <p>
+            <strong>On the training data:</strong> the current model is trained on a
+            <strong>synthetically generated image dataset</strong> designed to resemble
+            the color and texture differences observed between anemic and non-anemic
+            tissue. It has not been trained or tested on real clinical images, and no
+            accuracy or performance figures are claimed here. Results should be treated
+            as illustrative of the approach, not as a validated medical measurement.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how-it-works">
+    <div class="shell">
+      <div class="section-head centered reveal" style="margin-left:auto;margin-right:auto;">
+        <span class="eyebrow">The Process</span>
+        <h2>How it works</h2>
+        <p style="margin: 0 auto;">Three steps, from image to estimate.</p>
+      </div>
+
+      <div class="steps reveal">
+        <div class="step-card">
+          <span class="step-num">01 — Upload</span>
+          <h3>Upload an image</h3>
+          <p>Provide a clear photo of a palm or nail bed through the AnemiaAI tool.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">02 — Analyze</span>
+          <h3>The pipeline processes it</h3>
+          <p>The image runs through the project's computer-vision and machine-learning pipeline, which extracts color and texture features.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">03 — Estimate</span>
+          <h3>Get a risk estimate</h3>
+          <p>The system returns an anemia-risk estimate to help you decide whether further testing is worthwhile.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FEATURES / BENEFITS ================= -->
+  <section id="benefits" class="tight">
+    <div class="shell">
+      <div class="section-head reveal">
+        <span class="eyebrow">Benefits</span>
+        <h2>What AnemiaAI offers today</h2>
+        <p>A focused set of tools, with more planned as the project grows.</p>
+      </div>
+
+      <div class="features-grid reveal">
+        <div class="feature-card">
+          <div class="feature-icon">🖐️</div>
+          <h3>Palm Image Analysis</h3>
+          <p>Analyzes color and texture patterns from palm images as one visual signal.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💅</div>
+          <h3>Nail-Bed Image Analysis</h3>
+          <p>Examines nail-bed coloration, a common visual indicator used in physical exams.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>AI-Based Risk Estimation</h3>
+          <p>Combines extracted features through a machine-learning model to produce a risk estimate.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🖥️</div>
+          <h3>Simple Web Interface</h3>
+          <p>Upload an image and get a result in the browser — no installation required.</p>
+        </div>
+        <div class="feature-card soon">
+          <div class="feature-icon">🕘</div>
+          <h3>Prediction History <span class="soon-tag">Coming Soon</span></h3>
+          <p>Reviewing past screenings over time is planned for a future update.</p>
+        </div>
+        <div class="feature-card soon">
+          <div class="feature-icon">📊</div>
+          <h3>User Dashboard <span class="soon-tag">Coming Soon</span></h3>
+          <p>A personal dashboard for tracking results is planned for a future update.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DISCLAIMER ================= -->
+  <section class="tight">
+    <div class="shell">
+      <div class="disclaimer-box reveal">
+        <div class="disclaimer-icon">⚠️</div>
+        <div>
+          <h3>Medical Disclaimer</h3>
+          <p>
+            This application is an AI-based research and educational prototype. It is
+            not a medical diagnostic tool and should not be used as a substitute for
+            laboratory testing or professional medical advice. Please consult a
+            qualified healthcare professional for medical evaluation and diagnosis.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA ================= -->
+  <section class="cta-band tight">
+    <div class="shell">
+      <h2 class="reveal">Curious what the pipeline sees?</h2>
+      <p class="reveal">Try the screening tool with your own palm or nail-bed photo.</p>
+      <div class="cta-actions reveal">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Get Started</a>
+        <a href="#about-anemia" class="btn btn-ghost">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="shell">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand">
+            <div class="brand-icon">🩸</div>
+            <div class="brand-text">Anemia<span>AI</span></div>
+          </div>
+          <p>AI-assisted anemia risk screening — research prototype.</p>
+        </div>
+
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Navigate</h4>
+            <ul>
+              <li><a href="#top">Home</a></li>
+              <li><a href="#about-anemia">About Anemia</a></li>
+              <li><a href="#how-it-works">How It Works</a></li>
+              <li><a href="#benefits">Benefits</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Project</h4>
+            <ul>
+              <li><a href="{{ url_for('index') }}">Screening Tool</a></li>
+              <li><a href="https://github.com/ClariceDsilva/anemia-detection" target="_blank" rel="noopener">GitHub</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Account</h4>
+            <ul>
+              <li><a href="/login">Login</a></li>
+              <li><a href="/signup">Sign Up</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="footer-year">2026</span> AnemiaAI — research prototype. Not a medical device.</span>
+        <span><a href="https://github.com/ClariceDsilva/anemia-detection" target="_blank" rel="noopener">github.com/ClariceDsilva/anemia-detection</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+</body>
+</html>
