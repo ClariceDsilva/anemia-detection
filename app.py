@@ -42,6 +42,10 @@ def img_to_b64(img):
     return base64.b64encode(buffer).decode("utf-8")
 
 @app.route("/")
+def landing():
+    return render_template("landing.html")
+
+@app.route("/tool")
 def index():
     return render_template("index.html", model_loaded=MODEL is not None)
 
