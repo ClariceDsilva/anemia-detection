@@ -1,0 +1,14 @@
+# Local development database (Step 3A) — never commit this.
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Environments
+.env
+venv/
+.venv/

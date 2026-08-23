@@ -29,13 +29,23 @@
         <li><a href="#about-anemia">About Anemia</a></li>
         <li><a href="#how-it-works">How It Works</a></li>
         <li><a href="#benefits">Benefits</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/signup">Sign Up</a></li>
+        {% if current_user.is_authenticated %}
+          <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+          <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+        {% endif %}
       </ul>
 
       <div class="nav-auth">
-        <a href="/login" class="btn btn-ghost btn-sm">Login</a>
-        <a href="/signup" class="btn btn-primary btn-sm">Sign Up</a>
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="btn btn-ghost btn-sm">Dashboard</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-sm">Logout</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Login</a>
+          <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-sm">Sign Up</a>
+        {% endif %}
       </div>
 
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
@@ -62,7 +72,7 @@
         </p>
         <div class="hero-actions">
           <a href="{{ url_for('index') }}" class="btn btn-primary">Get Started</a>
-          <a href="#about-project" class="btn btn-ghost">Learn More</a>
+          <a href="#about-anemia" class="btn btn-ghost">Learn More</a>
         </div>
         <div class="hero-meta">
           <span class="dot"></span>
@@ -186,53 +196,6 @@
         like checking the color of the palms or nail beds — can help someone decide
         whether it's worth pursuing a proper blood test, without replacing one.
       </p>
-    </div>
-  </section>
-
-  <!-- ================= ABOUT THIS PROJECT ================= -->
-  <section id="about-project" class="tight">
-    <div class="shell">
-      <div class="section-head reveal">
-        <span class="eyebrow coral">About This Project</span>
-        <h2>A student-built research prototype</h2>
-        <p>
-          AnemiaAI is a computer vision and machine learning project exploring whether
-          image-based color and texture analysis can offer a useful, low-cost signal
-          for anemia risk. It is a proof of concept, not a finished medical product.
-        </p>
-      </div>
-
-      <div class="project-layout">
-        <div class="fact-list reveal">
-          <div class="fact-item">
-            <span class="mark">✓</span>
-            <p>A student / research project built to explore computer vision in a healthcare context.</p>
-          </div>
-          <div class="fact-item">
-            <span class="mark">✓</span>
-            <p>An AI-assisted <strong>screening</strong> prototype — not a diagnostic tool.</p>
-          </div>
-          <div class="fact-item">
-            <span class="mark">✓</span>
-            <p>Built on a computer vision / machine learning pipeline that extracts color and texture features from images.</p>
-          </div>
-          <div class="fact-item">
-            <span class="mark">✗</span>
-            <p>Not clinically validated, and not evaluated for real-world diagnostic accuracy.</p>
-          </div>
-        </div>
-
-        <div class="callout reveal">
-          <p>
-            <strong>On the training data:</strong> the current model is trained on a
-            <strong>synthetically generated image dataset</strong> designed to resemble
-            the color and texture differences observed between anemic and non-anemic
-            tissue. It has not been trained or tested on real clinical images, and no
-            accuracy or performance figures are claimed here. Results should be treated
-            as illustrative of the approach, not as a validated medical measurement.
-          </p>
-        </div>
-      </div>
     </div>
   </section>
 

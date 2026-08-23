@@ -9,9 +9,13 @@ from datetime import datetime
 
 import cv2
 from flask import Flask, request, render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from predict import load_model, predict_multiple, apply_symptom_modifier
+from extensions import db, login_manager
+from models import User
+from auth import auth_bp
 
 BASE_DIR = Path(__file__).parent
 UPLOAD_FOLDER = BASE_DIR / "static" / "uploads"
@@ -20,8 +24,38 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 app = Flask(__name__)
-app.secret_key = "secret"
+
+# SECRET_KEY: read from the environment in real deployments. The literal
+# string below is ONLY a fallback for local development so the app still
+# runs out of the box — it is not a real secret and must not be relied on
+# outside local dev.
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-insecure-secret-key")
+
 app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE
+
+# --- Database (Step 3A: local SQLite via Flask-SQLAlchemy only) ---
+# PostgreSQL is intentionally NOT configured yet; that's a later step.
+os.makedirs(app.instance_path, exist_ok=True)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL",
+    f"sqlite:///{os.path.join(app.instance_path, 'anemiaai.db')}",
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
+login_manager.init_app(app)
+
+app.register_blueprint(auth_bp)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+
+# Create tables automatically for local development if they don't exist yet.
+with app.app_context():
+    db.create_all()
 
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
@@ -46,10 +80,17 @@ def landing():
     return render_template("landing.html")
 
 @app.route("/tool")
+@login_required
 def index():
     return render_template("index.html", model_loaded=MODEL is not None)
 
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html", user=current_user)
+
 @app.route("/predict", methods=["POST"])
+@login_required
 def predict():
     if MODEL is None:
         flash("Model not loaded")

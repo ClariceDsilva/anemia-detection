@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — AnemiaAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-orb orb-cyan" aria-hidden="true"></div>
+  <div class="bg-orb orb-coral" aria-hidden="true"></div>
+
+  <div class="dash-topbar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <div class="brand-icon">🩸</div>
+      <div class="brand-text">Anemia<span>AI</span></div>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+  </div>
+
+  <div class="dash-wrap">
+    <div class="dash-card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-list">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <span class="eyebrow">Your AnemiaAI Account</span>
+      <h1>Welcome back, <span>{{ user.username }}</span></h1>
+      <p class="dash-copy">
+        This is your private AnemiaAI area. From here you can jump straight into
+        the anemia risk screening tool. Features like prediction history and a
+        fuller personal dashboard are planned for a future update.
+      </p>
+
+      <div class="dash-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Start Anemia Detection</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Logout</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

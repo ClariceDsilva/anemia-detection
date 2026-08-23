@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up — AnemiaAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-orb orb-cyan" aria-hidden="true"></div>
+  <div class="bg-orb orb-coral" aria-hidden="true"></div>
+
+  <div class="auth-topbar">
+    <a class="brand" href="{{ url_for('landing') }}">
+      <div class="brand-icon">🩸</div>
+      <div class="brand-text">Anemia<span>AI</span></div>
+    </a>
+  </div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <span class="eyebrow coral">Create Account</span>
+      <h1>Sign up for AnemiaAI</h1>
+      <p class="auth-sub">Create an account to use the anemia risk screening tool.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-list">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.signup') }}" novalidate>
+        <div class="form-field">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="janedoe"
+            value="{{ username or '' }}"
+            autocomplete="username"
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            value="{{ email or '' }}"
+            autocomplete="email"
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label for="confirm_password">Confirm Password</label>
+          <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit">Sign Up</button>
+      </form>
+
+      <p class="auth-switch">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+      </p>
+
+      <div class="auth-back">
+        <a href="{{ url_for('landing') }}">← Back to home</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
