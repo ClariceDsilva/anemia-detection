@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prediction History — AnemiaAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-orb orb-cyan" aria-hidden="true"></div>
+  <div class="bg-orb orb-coral" aria-hidden="true"></div>
+
+  <div class="dash-topbar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <div class="brand-icon">🩸</div>
+      <div class="brand-text">Anemia<span>AI</span></div>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+  </div>
+
+  <div class="history-wrap">
+    <div class="history-card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-list">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <span class="eyebrow">Your Predictions</span>
+      <h1>Prediction History</h1>
+      <p class="dash-copy">
+        Your most recent anemia risk screenings, newest first
+        {% if predictions|length >= 50 %}(showing the latest 50){% endif %}.
+        Only you can see your own history.
+      </p>
+
+      {% if predictions %}
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Risk Level</th>
+                <th>Confidence</th>
+                <th>Images</th>
+                <th>Symptom Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in predictions %}
+                <tr>
+                  <td>{{ entry.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                  <td>
+                    <span class="risk-pill" style="color: {{ entry.risk_color }}; border-color: {{ entry.risk_color }};">
+                      {{ entry.risk_level }}
+                    </span>
+                  </td>
+                  <td>{{ "%.1f"|format(entry.confidence_pct) }}%</td>
+                  <td>{{ entry.num_images }}</td>
+                  <td>{{ entry.symptom_score }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="history-empty">
+          <p>No predictions yet. Run a screening to see your history here.</p>
+        </div>
+      {% endif %}
+
+      <div class="dash-actions" style="margin-top: 28px;">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Start Anemia Detection</a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

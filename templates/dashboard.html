@@ -39,13 +39,14 @@
       <span class="eyebrow">Your AnemiaAI Account</span>
       <h1>Welcome back, <span>{{ user.username }}</span></h1>
       <p class="dash-copy">
-        This is your private AnemiaAI area. From here you can jump straight into
-        the anemia risk screening tool. Features like prediction history and a
-        fuller personal dashboard are planned for a future update.
+        This is your private AnemiaAI area. From here you can start a new
+        anemia risk screening or review your past predictions. A fuller
+        personal dashboard is still planned for a future update.
       </p>
 
       <div class="dash-actions">
         <a href="{{ url_for('index') }}" class="btn btn-primary">Start Anemia Detection</a>
+        <a href="{{ url_for('history') }}" class="btn btn-ghost">View History</a>
         <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost">Logout</a>
       </div>
     </div>

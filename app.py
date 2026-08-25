@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from predict import load_model, predict_multiple, apply_symptom_modifier
 from extensions import db, login_manager
-from models import User
+from models import User, PredictionHistory
 from auth import auth_bp
 
 BASE_DIR = Path(__file__).parent
@@ -33,13 +33,22 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-insecure-secret-key")
 
 app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE
 
-# --- Database (Step 3A: local SQLite via Flask-SQLAlchemy only) ---
-# PostgreSQL is intentionally NOT configured yet; that's a later step.
+# --- Database ---
+# Local development: SQLite (default, zero-config).
+# Deployment: set DATABASE_URL to a PostgreSQL connection string.
+# Some hosting providers (e.g. Render, Heroku) hand out DATABASE_URL using
+# the legacy "postgres://" scheme, but SQLAlchemy 1.4+ only accepts
+# "postgresql://" — normalize it here so either form works without any
+# extra configuration on the deployment side.
 os.makedirs(app.instance_path, exist_ok=True)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+database_url = os.environ.get(
     "DATABASE_URL",
     f"sqlite:///{os.path.join(app.instance_path, 'anemiaai.db')}",
 )
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
@@ -89,6 +98,20 @@ def index():
 def dashboard():
     return render_template("dashboard.html", user=current_user)
 
+@app.route("/history")
+@login_required
+def history():
+    # Strictly scoped to the logged-in user — never another user's data.
+    # Newest first, capped at the latest 50 for this initial version.
+    predictions = (
+        PredictionHistory.query
+        .filter_by(user_id=current_user.id)
+        .order_by(PredictionHistory.created_at.desc())
+        .limit(50)
+        .all()
+    )
+    return render_template("history.html", predictions=predictions)
+
 @app.route("/predict", methods=["POST"])
 @login_required
 def predict():
@@ -122,6 +145,30 @@ def predict():
     score = int(request.form.get("symptom_score", 0))
     if score > 0:
         result = apply_symptom_modifier(result, score)
+
+    # Save a metadata-only history record for this prediction. The ML
+    # result the user sees is already fully computed above and does not
+    # depend on this succeeding — if history storage fails (e.g. the
+    # database is temporarily unreachable), we roll back that failed
+    # transaction, log it clearly, and still return the user's real,
+    # correctly-computed prediction below. A history-write failure must
+    # never block, alter, or partially report the actual prediction result.
+    try:
+        history_entry = PredictionHistory(
+            user_id=current_user.id,
+            risk_level=result["risk_level"],
+            risk_color=result["risk_color"],
+            anemic_probability=result["anemic_probability"],
+            confidence_pct=result["confidence_pct"],
+            symptom_score=score,
+            num_images=len(images),
+            doctor_advice=result["doctor_advice"],
+        )
+        db.session.add(history_entry)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        log.exception("Failed to save prediction history — continuing without it")
 
     return render_template(
         "result.html",

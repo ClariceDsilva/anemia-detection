@@ -38,3 +38,34 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<User id={self.id} username={self.username!r}>"
+
+
+class PredictionHistory(db.Model):
+    """
+    A record of one completed anemia-risk prediction, tied to the user who
+    ran it.
+
+    Metadata only — deliberately does NOT store the uploaded images, image
+    file paths, or any base64/binary image data. Only the numeric/textual
+    outcome of the prediction is kept, which keeps rows small and portable
+    between SQLite (local dev) and PostgreSQL (deployment).
+    """
+
+    __tablename__ = "prediction_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    risk_level = db.Column(db.String(20), nullable=False)        # "Low" / "Medium" / "High"
+    risk_color = db.Column(db.String(20), nullable=False)        # "green" / "orange" / "red"
+    anemic_probability = db.Column(db.Float, nullable=False)
+    confidence_pct = db.Column(db.Float, nullable=False)
+    symptom_score = db.Column(db.Integer, nullable=False, default=0)
+    num_images = db.Column(db.Integer, nullable=False)
+    doctor_advice = db.Column(db.Text, nullable=False)
+
+    user = db.relationship("User", backref=db.backref("predictions", lazy=True))
+
+    def __repr__(self):
+        return f"<PredictionHistory id={self.id} user_id={self.user_id} risk_level={self.risk_level!r}>"
