@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings — AnemiaAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-orb orb-cyan" aria-hidden="true"></div>
+  <div class="bg-orb orb-coral" aria-hidden="true"></div>
+
+  <div class="dash-topbar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <div class="brand-icon">🩸</div>
+      <div class="brand-text">Anemia<span>AI</span></div>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+  </div>
+
+  <div class="dash-wrap">
+    <div class="dash-card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-list">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <span class="eyebrow">Account Settings</span>
+      <h1>Your Account</h1>
+      <p class="dash-copy">
+        Username: <strong style="color: var(--text);">{{ current_user.username }}</strong><br>
+        Email: <strong style="color: var(--text);">{{ current_user.email }}</strong><br>
+        Member since: <strong style="color: var(--text);">{{ current_user.created_at.strftime("%Y-%m-%d") }}</strong>
+      </p>
+
+      <h1 style="font-size: 1.15rem; margin-top: 8px;">Change Password</h1>
+
+      <form method="POST" action="{{ url_for('auth.account') }}" novalidate style="max-width: 420px;">
+        <div class="form-field">
+          <label for="current_password">Current Password</label>
+          <input
+            type="password"
+            id="current_password"
+            name="current_password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label for="new_password">New Password</label>
+          <input
+            type="password"
+            id="new_password"
+            name="new_password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label for="confirm_new_password">Confirm New Password</label>
+          <input
+            type="password"
+            id="confirm_new_password"
+            name="confirm_new_password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit">Update Password</button>
+      </form>
+
+      <div class="dash-actions" style="margin-top: 28px;">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

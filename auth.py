@@ -90,3 +90,35 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("landing"))
+
+
+@auth_bp.route("/account", methods=["GET", "POST"])
+@login_required
+def account():
+    if request.method == "POST":
+        current_password = request.form.get("current_password") or ""
+        new_password = request.form.get("new_password") or ""
+        confirm_new_password = request.form.get("confirm_new_password") or ""
+
+        # --- Validation ---
+        if not current_password or not new_password or not confirm_new_password:
+            flash("All fields are required.", "error")
+            return render_template("account.html")
+
+        if not current_user.check_password(current_password):
+            flash("Current password is incorrect.", "error")
+            return render_template("account.html")
+
+        if new_password != confirm_new_password:
+            flash("New passwords do not match.", "error")
+            return render_template("account.html")
+
+        # --- Update the password (reuses the existing hashing method —
+        # never stored as plain text, same as at signup) ---
+        current_user.set_password(new_password)
+        db.session.commit()
+
+        flash("Password updated successfully.", "success")
+        return redirect(url_for("auth.account"))
+
+    return render_template("account.html")
