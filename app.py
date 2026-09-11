@@ -8,11 +8,12 @@ from pathlib import Path
 from datetime import datetime
 
 import cv2
+import numpy as np
 from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
-from predict import load_model, predict_multiple, apply_symptom_modifier
+from predict import load_model, predict_multiple, apply_symptom_modifier, is_relevant_hand_image
 from extensions import db, login_manager
 from models import User, PredictionHistory
 from auth import auth_bp
@@ -121,24 +122,66 @@ def predict():
 
     files = request.files.getlist("images")
 
+    if not files or all(f.filename == "" for f in files):
+        flash("No valid images")
+        return redirect(url_for("index"))
+
+    # --- Validate every uploaded file BEFORE saving or predicting anything ---
+    # Files are decoded straight from the uploaded bytes in memory (never
+    # written to disk here), so a rejected image is never persisted, even
+    # temporarily. If ANY file in the batch is invalid/corrupt/irrelevant,
+    # the ENTIRE batch is rejected and the model is never called.
+    decoded = []          # (img, filename) pairs for files that pass every check
+    rejection_reasons = []
+
+    for file in files:
+        if not file or file.filename == "":
+            continue
+
+        if not allowed_file(file.filename):
+            rejection_reasons.append("disallowed_extension")
+            continue
+
+        raw_bytes = file.read()
+        img_array = np.frombuffer(raw_bytes, np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+
+        is_valid, reason = is_relevant_hand_image(img)
+        if not is_valid:
+            rejection_reasons.append(reason)
+            continue
+
+        decoded.append((img, secure_filename(file.filename)))
+
+    if rejection_reasons:
+        content_rejected = any(
+            reason == "face_detected"
+            or reason.startswith("low_skin_ratio")
+            or reason.startswith("high_edge_density")
+            for reason in rejection_reasons
+        )
+        if content_rejected:
+            flash("Please upload only clear images of a hand, palm, or fingernail.")
+        else:
+            flash("One or more files are not valid images. Please upload clear JPG, JPEG, or PNG images.")
+        return redirect(url_for("index"))
+
+    if not decoded:
+        flash("No valid images")
+        return redirect(url_for("index"))
+
+    # --- Every image in the batch passed validation — now (and only now)
+    # save and run the existing, unchanged prediction flow ---
     images = []
     previews = []
 
-    for file in files:
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            path = UPLOAD_FOLDER / f"{uuid.uuid4()}_{filename}"
-            file.save(path)
+    for img, filename in decoded:
+        path = UPLOAD_FOLDER / f"{uuid.uuid4()}_{filename}"
+        cv2.imwrite(str(path), img)
 
-            img = cv2.imread(str(path))
-            img = cv2.resize(img, (224, 224))
-
-            images.append(img)
-            previews.append(img_to_b64(img))
-
-    if not images:
-        flash("No valid images")
-        return redirect(url_for("index"))
+        resized = cv2.resize(img, (224, 224))
+        images.append(resized)
+        previews.append(img_to_b64(resized))
 
     result = predict_multiple(MODEL, images)
 
