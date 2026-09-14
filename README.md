@@ -6,8 +6,7 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/ClariceDsilva/anemia-detection)
 
-[![Demo Video](https://img.shields.io/badge/YouTube-Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/i7DYuhvqRJw)
-
+[![Demo Video](https://img.shields.io/badge/YouTube-Demo-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=9riwLoUnYdE)
 ---
 
 ## 🚀 Live Demo
