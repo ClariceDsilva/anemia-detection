@@ -1,146 +1,213 @@
-# 🩸 AnemiaAI — Intelligent Anemia Detection System
+# 🩸 AnemiaAI — Intelligent Anemia Risk Detection System
 
-> **Final Year Project** — Image-based anemia risk assessment using Machine Learning
+> **Final Year Project** — A machine-learning-powered web application for image-based anemia risk assessment using palm/hand, fingernail/nail-bed, and inner-eyelid images.
 
----
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-success?style=for-the-badge)](https://anemia-detection-cm4p.onrender.com/)
 
-## Overview
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/ClariceDsilva/anemia-detection)
 
-AnemiaAI detects anemia risk from conjunctiva (inner eyelid) and nail bed images by analyzing color pallor,
-saturation, and texture biomarkers — the same visual indicators clinicians examine during physical assessment.
-
-### Risk Levels
-| Range | Level | Action |
-|-------|-------|--------|
-| 0–40% | 🟢 Low Risk | Routine monitoring |
-| 40–70% | 🟡 Medium Risk | Clinical blood test recommended |
-| 70–100% | 🔴 High Risk | Urgent medical consultation |
+[![Demo Video](https://img.shields.io/badge/YouTube-Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/i7DYuhvqRJw)
 
 ---
 
-## Quick Start
+## 🚀 Live Demo
 
-### 1. Install Requirements
-```bash
-pip install -r requirements.txt
-```
+### 🌐 Try the application
 
-### 2. Generate Dataset
-```bash
-python dataset_generator.py
-```
+**Live Application:**  
+https://anemia-detection-cm4p.onrender.com/
 
-### 3. Train Model
-```bash
-python train.py
-```
+### 🎥 Project Demonstration
 
-### 4. Run Web App
-```bash
-python app.py
-```
-Then open: **http://localhost:5000**
+**YouTube Demo Video:**  
+https://youtu.be/i7DYuhvqRJw
+
+The demonstration video shows the main application workflow, including image upload, validation, anemia risk prediction, and the application's user-facing features.
 
 ---
 
-## Project Structure
+## 📌 Project Overview
 
-```
-anemia_project/
-├── app.py                  # Flask web application
-├── train.py                # Model training pipeline
-├── predict.py              # Prediction module
-├── dataset_generator.py    # Synthetic dataset generator
-├── requirements.txt        # Python dependencies
-├── README.md               # This file
-│
-├── model/
-│   ├── best_model.pkl      # Trained GBM model (generated)
-│   └── model_metadata.json # Metrics & config (generated)
-│
-├── dataset/
-│   ├── anemic/             # Anemic images (generated)
-│   └── normal/             # Normal images (generated)
-│
-├── templates/
-│   ├── index.html          # Upload page
-│   └── result.html         # Results page
-│
-├── static/
-│   ├── training_curves.png # Training plot (generated)
-│   ├── confusion_matrix.png# CM plot (generated)
-│   └── uploads/            # Uploaded images (runtime)
-│
-└── logs/
-    └── training.log        # Training log (generated)
-```
+AnemiaAI is a web-based machine learning application designed to provide an **image-based preliminary anemia risk assessment**.
+
+The system analyzes visual characteristics from supported biological image regions such as:
+
+- ✋ Palm / hand
+- 💅 Fingernail / nail-bed
+- 👁️ Inner eyelid / conjunctiva
+
+These regions can exhibit visible changes in coloration and pallor that are relevant to anemia screening.
+
+The application combines:
+
+- Machine Learning
+- Computer Vision
+- Image preprocessing
+- Image validation
+- Flask web development
+- User authentication
+- Prediction history
+- Responsive web interfaces
+
+The goal is to provide an accessible educational screening tool while clearly communicating that **anemia cannot be clinically diagnosed from an image alone**.
 
 ---
 
-## Technical Details
+# ✨ Key Features
 
-### Feature Extraction
-Each image is processed through three feature extractors:
+## 🧠 Machine Learning Prediction
 
-1. **Color Histograms (BGR + HSV)** — 192 features
-   - 32-bin histograms per channel (Blue, Green, Red, Hue, Saturation, Value)
-   - Captures the fundamental color distribution indicating pallor
+The application uses a trained machine-learning model to classify uploaded images into:
 
-2. **Statistical Features** — 15 features
-   - Per-channel mean, std, quartiles (P10, P25, P75, P90)
-   - **Pallor Index** = G_mean / R_mean (elevated in anemia)
-   - **Yellowness Index** = (R + G) / (2B) (jaundice indicator)
-   - HSV saturation statistics
+- `Anemic`
+- `Normal`
 
-3. **Texture Features** — 8 features
-   - Laplacian variance (sharpness/texture measure)
-   - Sobel gradient magnitude (edge strength)
-   - Local Binary Pattern approximation
-
-**Total: ~215 features per image**
-
-### Model
-- **Algorithm:** Gradient Boosting Classifier (sklearn)
-- **n_estimators:** 200, **learning_rate:** 0.05
-- **Pipeline:** StandardScaler → GradientBoostingClassifier
-- **Early stopping:** Via cross-validation + best model saving
-- **Evaluation:** Train/Val/Test split + AUC-ROC
-
-### Dataset
-- **Synthetic** dataset generated using OpenCV
-- Anemic images: pale, low-saturation, yellowish hue
-- Normal images: healthy pink-red, well-vascularized
-- Augmentation: flip, rotation (±10°, ±20°), brightness ±20%, color jitter
-- ~800 base images, ~1600+ after augmentation
+The model also produces an anemia probability and confidence value.
 
 ---
 
-## API
+## 🖼️ Multiple Image Prediction
 
-```bash
-# JSON API endpoint
-curl -X POST http://localhost:5000/api/predict \
-  -F "images=@your_image.jpg"
-```
+Users can upload multiple supported images in a single prediction request.
 
-Response:
-```json
-{
-  "risk_level": "Medium Risk",
-  "anemic_probability": 0.543,
-  "confidence_pct": 54.3,
-  "num_images": 1
-}
-```
+The system processes the valid images and calculates an overall anemia probability from the individual predictions.
+
+This allows multiple visual regions/images to contribute to a single assessment.
 
 ---
 
-## Disclaimer
+## 🛡️ Pre-Prediction Image Validation
 
-This tool is for **educational purposes only**. It does not constitute medical advice and cannot replace
-professional clinical diagnosis. Anemia must be confirmed through laboratory tests (CBC, hemoglobin, ferritin).
-Always consult a licensed healthcare provider.
+Uploaded images are validated **before they are sent to the machine-learning model**.
+
+The validation layer checks for:
+
+1. Corrupt or undecodable images
+2. Images that are too small
+3. Clearly visible face images
+4. Insufficient biological skin/tissue characteristics
+5. Excessive edge/detail density associated with documents, screenshots, or unrelated content
+
+If an uploaded batch contains an invalid or irrelevant image, the entire batch is rejected.
+
+This prevents unrelated images from being passed directly to the anemia prediction model.
 
 ---
 
-*Built with Flask · OpenCV · Scikit-learn · Python 3*
+## 👁️ Supported Image Types
+
+The validation system is designed to accept:
+
+- Palm/hand images
+- Fingernail/nail-bed images
+- Inner-eyelid images
+
+The validator was adjusted to be more tolerant of nail-bed and eyelid images because these images naturally contain less skin-colored area than palm photographs.
+
+---
+
+## 🚫 Irrelevant Image Rejection
+
+The application attempts to prevent users from submitting unrelated images such as:
+
+- Face photographs
+- Documents
+- Screenshots
+- Scenery
+- Random/noisy images
+- Corrupt image files
+- Unsupported file types
+
+Rejected images are not passed to the prediction model.
+
+---
+
+## 👤 User Authentication
+
+The application includes user authentication functionality.
+
+Users can:
+
+- Register/login
+- Access authenticated application features
+- Logout
+- Access their account
+- Change their password
+
+Authentication is implemented using Flask-based authentication components.
+
+---
+
+## 📊 Prediction History
+
+Authenticated users can view their previous prediction results.
+
+Prediction history allows users to keep track of previous assessments performed through the application.
+
+---
+
+## 🩺 Symptom-Based Risk Adjustment
+
+The application also provides a symptom assessment component.
+
+User-selected symptom information can be incorporated into the final risk assessment through the application's symptom modifier.
+
+This is used as an additional risk-assessment input and is not intended to replace clinical diagnosis.
+
+---
+
+# 🧬 How the System Works
+
+The overall workflow is:
+
+```text
+                ┌──────────────────────┐
+                │      User Login      │
+                └──────────┬───────────┘
+                           │
+                           ▼
+                ┌──────────────────────┐
+                │    Upload Images     │
+                │ Palm / Nail / Eyelid │
+                └──────────┬───────────┘
+                           │
+                           ▼
+              ┌──────────────────────────┐
+              │ Image Validation Layer   │
+              │                          │
+              │ • Decode check           │
+              │ • Minimum dimensions     │
+              │ • Face detection         │
+              │ • Tissue/skin analysis   │
+              │ • Edge-density check     │
+              └──────────┬───────────────┘
+                         │
+               ┌─────────┴─────────┐
+               │                   │
+             Reject               Pass
+               │                   │
+               ▼                   ▼
+        Show validation      ┌───────────────┐
+           message           │ Preprocessing │
+                             └───────┬───────┘
+                                     │
+                                     ▼
+                             ┌───────────────┐
+                             │ ML Prediction │
+                             └───────┬───────┘
+                                     │
+                                     ▼
+                            ┌─────────────────┐
+                            │ Risk Assessment │
+                            └────────┬────────┘
+                                     │
+                                     ▼
+                           ┌──────────────────┐
+                           │ Results + Advice │
+                           └────────┬─────────┘
+                                    │
+                                    ▼
+                           ┌──────────────────┐
+                           │ Prediction       │
+                           │ History          │
+                           └──────────────────┘
